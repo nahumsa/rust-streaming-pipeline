@@ -5,7 +5,9 @@ use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::util::Timeout;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use uuid::{Uuid};
- 
+
+const KAFKA_ADDRS: &str = "localhost:29092";
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut stdout = tokio::io::stdout();
@@ -29,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
  
     let producer = create_producer(&args().skip(1).next()
-        .unwrap_or("localhost:29092".to_string()))?;
+        .unwrap_or(KAFKA_ADDRS.to_string()))?;
  
     stdout.write("-------------\n\n".as_bytes()).await.unwrap();
  
@@ -40,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Failed to produce");
  
     let consumer = create_consumer(&args().skip(1).next()
-        .unwrap_or("localhost:29092".to_string()))?;
+        .unwrap_or(KAFKA_ADDRS.to_string()))?;
  
     consumer.subscribe(&["chat"])?;
  
@@ -61,6 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 stdout.write(payload).await?;
                 stdout.write(b"\n").await?;
             }
+
             line = input_lines.next_line() => {
                 match line {
                     Ok(Some(line)) => {
